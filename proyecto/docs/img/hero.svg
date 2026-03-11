@@ -1,0 +1,28 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B132B"/>
+      <stop offset="1" stop-color="#1C2541"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="165" y1="130" x2="960" y2="290" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5BC0BE"/>
+      <stop offset="1" stop-color="#6FFFE9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg)"/>
+  <circle cx="1020" cy="-20" r="260" fill="#5BC0BE" fill-opacity="0.10"/>
+  <circle cx="170" cy="430" r="220" fill="#6FFFE9" fill-opacity="0.10"/>
+
+  <rect x="120" y="110" width="960" height="210" rx="22" fill="#FFFFFF" fill-opacity="0.04" stroke="#6FFFE9" stroke-opacity="0.35"/>
+
+  <text x="165" y="180" fill="#E8F1F2" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">
+    PORTAL DE SERVICIOS
+  </text>
+  <text x="165" y="230" fill="url(#accent)" font-family="Segoe UI, Arial, sans-serif" font-size="56" font-weight="700">
+    Gestor Visual de IP y Puertos
+  </text>
+  <text x="165" y="275" fill="#C7D6D8" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">
+    Acceso rapido a aplicaciones locales con persistencia en navegador
+  </text>
+</svg>
