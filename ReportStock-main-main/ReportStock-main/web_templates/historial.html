@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Historial de PDFs por vendedor | Lamar Optical</title>
+    <style>
+        :root {
+            --bg: #f2f6fb;
+            --surface: #ffffff;
+            --surface-soft: #f7fbff;
+            --line: #d8e2ee;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #144a7e;
+            --primary-2: #1b5f9f;
+            --shadow: 0 18px 36px rgba(17, 37, 63, .09);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--text);
+            background:
+                linear-gradient(150deg, rgba(20,74,126,.08) 0%, rgba(20,74,126,0) 42%),
+                radial-gradient(circle at 85% 10%, rgba(27,95,159,.14) 0%, rgba(27,95,159,0) 35%),
+                var(--bg);
+            min-height: 100vh;
+        }
+
+        .shell {
+            max-width: 1440px;
+            margin: 20px auto;
+            padding: 0 18px 28px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            padding: 14px 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand img {
+            width: 190px;
+            height: 58px;
+            object-fit: contain;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            padding: 4px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(1.06rem, 1.8vw, 1.3rem);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .header a {
+            text-decoration: none;
+            font-size: .88rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-shadow: 0 8px 16px rgba(20,74,126,.28);
+        }
+
+        .card {
+            margin-top: 14px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            min-height: 76vh;
+            padding: 16px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .toolbar h2 {
+            margin: 0;
+            font-size: 1.08rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filters a {
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #cbd7e6;
+            color: #334155;
+            font-size: .86rem;
+            font-weight: 700;
+            background: #fff;
+        }
+
+        .filters a.active {
+            background: #e9f3fc;
+            border-color: #a8c3de;
+            color: #1b4f7e;
+        }
+
+        .table-scroll {
+            max-height: 64vh;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .92rem;
+        }
+
+        th, td {
+            border-bottom: 1px solid #e7edf6;
+            text-align: left;
+            vertical-align: middle;
+            padding: 10px 9px;
+            white-space: nowrap;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f2f8ff;
+            color: #2e4864;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        tr:hover td {
+            background: var(--surface-soft);
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: .76rem;
+            font-weight: 800;
+            border: 1px solid;
+        }
+
+        .badge.inv {
+            color: #7a4b08;
+            background: #fff4cc;
+            border-color: #f6dea0;
+        }
+
+        .badge.lam {
+            color: #164f85;
+            background: #deedfc;
+            border-color: #b8d4ef;
+        }
+
+        .btn {
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            border-radius: 9px;
+            padding: 7px 11px;
+            font-size: .83rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 8px 16px rgba(20,74,126,.24);
+        }
+
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+            box-shadow: 0 8px 16px rgba(185, 28, 28, .28);
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            padding: 7px 11px;
+            font-size: .83rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn-danger:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .selection-controls {
+            display: none;
+        }
+
+        .selection-column,
+        .selection-cell {
+            display: none;
+        }
+
+        body.selection-mode .selection-column,
+        body.selection-mode .selection-cell {
+            display: table-cell;
+        }
+
+        .selected-counter {
+            font-size: .86rem;
+            font-weight: 700;
+            color: #1b4f7e;
+            background: #e9f3fc;
+            border: 1px solid #b8d4ef;
+            border-radius: 999px;
+            padding: 7px 11px;
+        }
+
+        .check-cell {
+            text-align: center;
+            width: 56px;
+        }
+
+        .alert {
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            font-size: .9rem;
+            font-weight: 700;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .empty {
+            color: var(--muted);
+            text-align: center;
+            padding: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .brand img {
+                width: 165px;
+                height: 52px;
+            }
+
+            th:nth-child(4), td:nth-child(4) { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="header">
+            <div class="brand">
+                {% if page_logo_available %}
+                    <img src="/logo-pagina" alt="Logo Lamar Optical" />
+                {% endif %}
+                <div>
+                    <h1>Historial de PDFs por vendedor</h1>
+                    <p>Repositorio organizado de reportes individuales generados por empresa.</p>
+                </div>
+            </div>
+            <a href="/">Volver al panel</a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="card">
+            <div class="toolbar">
+                <h2>Consulta y descarga de reportes</h2>
+                <div class="toolbar-actions">
+                    <div class="filters">
+                        <a href="/historial" class="{% if not empresa_filtro %}active{% endif %}">Todas</a>
+                        <a href="/historial?empresa=Inversiones" class="{% if empresa_filtro == 'Inversiones' %}active{% endif %}">Inversiones</a>
+                        <a href="/historial?empresa=Lamar" class="{% if empresa_filtro == 'Lamar' %}active{% endif %}">Lamar</a>
+                    </div>
+                    {% if items %}
+                        <button id="toggleSelectionBtn" type="button" class="btn" onclick="toggleSelectionMode();">Seleccionar</button>
+                        <span id="selectedCounter" class="selected-counter selection-controls">0 líneas seleccionadas</span>
+                        <button id="selectAllBtn" type="button" class="btn selection-controls" onclick="seleccionarTodasLineas();">Seleccionar todo</button>
+                        <button id="downloadSelectedBtn" type="button" class="btn selection-controls" onclick="descargarSeleccionados();">Descargar seleccionadas</button>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if items %}
+                <form id="seleccionForm" method="post" action="/historial/eliminar-seleccion" onsubmit="return enviarEliminacionSeleccion();">
+                    <input type="hidden" name="empresa" value="{{ empresa_filtro }}" />
+                    <input type="hidden" name="delete_key" value="" />
+
+                    <div class="toolbar-actions" style="margin-bottom: 10px;">
+                        <button id="deleteSelectedBtn" type="submit" class="btn-danger selection-controls">Eliminar seleccionadas</button>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="check-cell selection-column"></th>
+                                    <th>Fecha</th>
+                                    <th>Empresa</th>
+                                    <th>Vendedor</th>
+                                    <th>Archivo PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                    <tr>
+                                        <td class="check-cell selection-cell">
+                                            <input
+                                                type="checkbox"
+                                                class="row-check"
+                                                name="selected_items"
+                                                value="{{ item.reporte_id }}::{{ item.item_index }}"
+                                                data-download-url="/descargar-vendedor/{{ item.reporte_id }}/{{ item.item_index }}"
+                                            />
+                                        </td>
+                                        <td>{{ item.fecha[:19].replace('T', ' ') if item.fecha else '-' }}</td>
+                                        <td>
+                                            {% if item.empresa == 'Inversiones' %}
+                                                <span class="badge inv">Inversiones</span>
+                                            {% elif item.empresa == 'Lamar' %}
+                                                <span class="badge lam">Lamar</span>
+                                            {% else %}
+                                                <span class="badge">{{ item.empresa or '-' }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.bodega }}</td>
+                                        <td>{{ item.archivo_pdf }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            {% else %}
+                <div class="empty">No hay reportes disponibles para este filtro.</div>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        let selectionMode = false;
+
+        function obtenerSeleccionadas() {
+            return Array.from(document.querySelectorAll('.row-check:checked'));
+        }
+
+        function actualizarContadorSeleccion() {
+            const total = obtenerSeleccionadas().length;
+            const counter = document.getElementById('selectedCounter');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const downloadBtn = document.getElementById('downloadSelectedBtn');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+            const selectionControls = document.querySelectorAll('.selection-controls');
+
+            selectionControls.forEach((el) => {
+                el.style.display = 'none';
+            });
+
+            if (!selectionMode) {
+                return;
+            }
+
+            counter.textContent = `${total} línea${total === 1 ? '' : 's'} seleccionada${total === 1 ? '' : 's'}`;
+
+            if (total > 0) {
+                if (counter) counter.style.display = 'inline-block';
+                if (selectAllBtn) selectAllBtn.style.display = 'inline-block';
+                if (downloadBtn) downloadBtn.style.display = 'inline-block';
+                if (deleteBtn) deleteBtn.style.display = 'inline-block';
+            }
+        }
+
+        function limpiarSeleccion() {
+            document.querySelectorAll('.row-check').forEach((cb) => {
+                cb.checked = false;
+            });
+        }
+
+        function toggleSelectionMode() {
+            selectionMode = !selectionMode;
+
+            const toggleBtn = document.getElementById('toggleSelectionBtn');
+            if (selectionMode) {
+                document.body.classList.add('selection-mode');
+                if (toggleBtn) toggleBtn.textContent = 'Cancelar';
+            } else {
+                document.body.classList.remove('selection-mode');
+                limpiarSeleccion();
+                if (toggleBtn) toggleBtn.textContent = 'Seleccionar';
+            }
+
+            actualizarContadorSeleccion();
+        }
+
+        function seleccionarTodasLineas() {
+            if (!selectionMode) {
+                return;
+            }
+            document.querySelectorAll('.row-check').forEach((cb) => {
+                cb.checked = true;
+            });
+            actualizarContadorSeleccion();
+        }
+
+        function descargarSeleccionados() {
+            const seleccionadas = obtenerSeleccionadas();
+            if (!seleccionadas.length) {
+                alert('Debes seleccionar al menos una línea para descargar.');
+                return;
+            }
+
+            seleccionadas.forEach((cb, index) => {
+                const url = cb.dataset.downloadUrl;
+                setTimeout(() => {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = url;
+                    document.body.appendChild(iframe);
+                    setTimeout(() => iframe.remove(), 10000);
+                }, index * 350);
+            });
+        }
+
+        function enviarEliminacionSeleccion() {
+            if (!selectionMode) {
+                alert('Primero pulsa el botón Seleccionar.');
+                return false;
+            }
+
+            const seleccionadas = obtenerSeleccionadas();
+            if (!seleccionadas.length) {
+                alert('Debes seleccionar al menos una línea para eliminar.');
+                return false;
+            }
+
+            if (!confirm('¿Eliminar las líneas seleccionadas del historial?')) {
+                return false;
+            }
+
+            const clave = prompt('Ingresa la clave para confirmar eliminación:');
+            if (!clave) {
+                return false;
+            }
+
+            const form = document.getElementById('seleccionForm');
+            const input = form.querySelector('input[name="delete_key"]');
+            if (input) {
+                input.value = clave;
+            }
+
+            return true;
+        }
+
+        document.querySelectorAll('.row-check').forEach((cb) => {
+            cb.addEventListener('change', actualizarContadorSeleccion);
+        });
+
+        actualizarContadorSeleccion();
+    </script>
+</body>
+</html>

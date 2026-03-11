@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ReportStock | Lamar Optical</title>
+    <style>
+        :root {
+            --bg: #f2f6fb;
+            --surface: #ffffff;
+            --surface-soft: #f8fbff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --line: #d9e2ef;
+            --primary: #144a7e;
+            --primary-2: #1b5f9f;
+            --ok: #0f766e;
+            --danger: #b91c1c;
+            --shadow: 0 18px 36px rgba(17, 37, 63, .09);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--text);
+            background:
+                linear-gradient(150deg, rgba(20,74,126,.08) 0%, rgba(20,74,126,0) 42%),
+                radial-gradient(circle at 85% 10%, rgba(27,95,159,.14) 0%, rgba(27,95,159,0) 35%),
+                var(--bg);
+            min-height: 100vh;
+        }
+
+        .shell {
+            max-width: 1320px;
+            margin: 24px auto;
+            padding: 0 18px 30px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand img {
+            width: 190px;
+            height: 58px;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fff;
+            padding: 4px;
+        }
+
+        .brand-meta {
+            min-width: 0;
+        }
+
+        .brand-meta h1 {
+            margin: 0;
+            font-size: clamp(1.02rem, 1.8vw, 1.26rem);
+            letter-spacing: .01em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .brand-meta p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .header a {
+            text-decoration: none;
+            font-weight: 700;
+            font-size: .88rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-shadow: 0 8px 16px rgba(20,74,126,.28);
+        }
+
+        .hero {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 14px;
+        }
+
+        .hero-card,
+        .image-card {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: 20px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            color: var(--primary);
+            border: 1px solid #bfd2e7;
+            background: #eaf3fc;
+            margin-bottom: 10px;
+        }
+
+        .hero-card h2 {
+            margin: 0;
+            font-size: clamp(1.42rem, 2.5vw, 2rem);
+            line-height: 1.15;
+            letter-spacing: -.01em;
+        }
+
+        .hero-card p {
+            margin: 10px 0 0;
+            color: var(--muted);
+            line-height: 1.56;
+        }
+
+        .kpis {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .kpi {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--surface-soft);
+            padding: 10px;
+        }
+
+        .kpi strong {
+            display: block;
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .kpi span {
+            font-size: .96rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .image-card {
+            min-height: 240px;
+            background:
+                linear-gradient(0deg, rgba(15,23,42,.15), rgba(15,23,42,.15)),
+                url('https://images.unsplash.com/photo-1574258495973-f010dfbb5371?auto=format&fit=crop&w=1400&q=60') center/cover no-repeat;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-card .caption {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            color: #f8fafc;
+            font-size: .88rem;
+            background: rgba(2,6,23,.42);
+            border: 1px solid rgba(226,232,240,.2);
+            border-radius: 10px;
+            padding: 8px 10px;
+            backdrop-filter: blur(2px);
+        }
+
+        .main-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: .9fr 1.1fr;
+            gap: 14px;
+        }
+
+        .panel,
+        .form-card {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .panel {
+            padding: 18px;
+            background:
+                linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+        }
+
+        .panel h3 {
+            margin: 0 0 8px;
+            font-size: 1.02rem;
+        }
+
+        .panel p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.54;
+            font-size: .91rem;
+        }
+
+        .checklist {
+            margin: 14px 0 0;
+            list-style: none;
+            padding: 0;
+            display: grid;
+            gap: 8px;
+        }
+
+        .checklist li {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 9px 10px;
+            font-size: .89rem;
+            background: #fff;
+            color: #1e293b;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            font-weight: 800;
+            color: var(--ok);
+            margin-right: 8px;
+        }
+
+        .form-card {
+            padding: 20px;
+        }
+
+        .form-card h3 {
+            margin: 0 0 12px;
+            font-size: 1.08rem;
+        }
+
+        .row { margin-bottom: 14px; }
+
+        .row-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            font-size: .9rem;
+            color: #1e293b;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #c9d6e7;
+            background: #fff;
+            padding: 11px 12px;
+            font-size: .93rem;
+            transition: all .2s ease;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #8fb1d5;
+            box-shadow: 0 0 0 3px rgba(30,96,159,.16);
+        }
+
+        button {
+            border: none;
+            color: #fff;
+            font-weight: 800;
+            letter-spacing: .01em;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 10px 22px rgba(20,74,126,.3);
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 24px rgba(20,74,126,.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            box-shadow: 0 10px 22px rgba(13,148,136,.25);
+        }
+
+        .note {
+            margin-top: 6px;
+            font-size: .81rem;
+            color: var(--muted);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+
+        .table-actions button {
+            width: auto;
+            margin: 0;
+            padding: 8px 12px;
+            font-size: .83rem;
+            border-radius: 9px;
+            box-shadow: none;
+        }
+
+        .table-actions .btn-mini { background: #0f172a; }
+        .table-actions .btn-mini.alt { background: #475569; }
+
+        .table-wrap {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .vendors-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .9rem;
+        }
+
+        .vendors-table th,
+        .vendors-table td {
+            border-bottom: 1px solid #e5eaf3;
+            padding: 9px 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .vendors-table th {
+            background: #f3f8fe;
+            color: #28435f;
+            font-weight: 800;
+            font-size: .79rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .vendors-table tr:last-child td { border-bottom: none; }
+
+        .vendors-table input[type="number"] {
+            width: 120px;
+            padding: 8px 9px;
+            margin: 0;
+        }
+
+        .inline-msg {
+            margin-top: 8px;
+            font-size: .84rem;
+            font-weight: 700;
+        }
+
+        .inline-msg.error { color: var(--danger); }
+        .inline-msg.success { color: var(--ok); }
+
+        .alert {
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            font-size: .9rem;
+            font-weight: 700;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #86efac;
+        }
+
+        @media (max-width: 1120px) {
+            .hero,
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .image-card {
+                min-height: 220px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .row-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .brand img {
+                width: 165px;
+                height: 52px;
+            }
+
+            .kpis {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="header">
+            <div class="brand">
+                {% if page_logo_available %}
+                    <img src="/logo-pagina" alt="Logo Lamar Optical" />
+                {% endif %}
+                <div class="brand-meta">
+                    <h1>Lamar Optical SAS · Panel de Reportes de Agotados</h1>
+                    <p>Gestión empresarial de inventario, filtros por vendedor y exportación automatizada.</p>
+                </div>
+            </div>
+            <a href="/historial">Historial de PDFs</a>
+        </header>
+
+        <section class="hero">
+            <div class="hero-card">
+                <span class="tag">DASHBOARD EMPRESARIAL</span>
+                <h2>Reportes confiables para decisiones rápidas</h2>
+                <p>Consolida información de productos agotados desde inventario central, aplica filtros por vendedor y descarga reportes listos para operación comercial.</p>
+                <div class="kpis">
+                    <div class="kpi">
+                        <strong>Visualización</strong>
+                        <span>Clara y ordenada</span>
+                    </div>
+                    <div class="kpi">
+                        <strong>Enfoque</strong>
+                        <span>Inventario óptico</span>
+                    </div>
+                    <div class="kpi">
+                        <strong>Salida</strong>
+                        <span>ZIP + PDFs</span>
+                    </div>
+                </div>
+            </div>
+            <div class="image-card">
+                <div class="caption">Ópticas modernas · control de inventario · procesos empresariales</div>
+            </div>
+        </section>
+
+        <section class="main-grid">
+            <aside class="panel">
+                <h3>Flujo recomendado</h3>
+                <p>El sistema analiza la bodega PRINCIPAL y compara la disponibilidad por vendedor para identificar agotados críticos.</p>
+                <ul class="checklist">
+                    <li>Cargar archivo Excel de inventario</li>
+                    <li>Seleccionar empresa y cantidad mínima</li>
+                    <li>Leer vendedores y aplicar filtros individuales</li>
+                    <li>Generar ZIP con fecha y empresa</li>
+                </ul>
+            </aside>
+
+            <main class="form-card">
+                <h3>Generar reportes de agotados</h3>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form action="/generar" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <label for="archivo_excel">Archivo Excel (.xls o .xlsx)</label>
+                        <input id="archivo_excel" name="archivo_excel" type="file" accept=".xls,.xlsx" required />
+                    </div>
+
+                    <div class="row-grid">
+                        <div class="row">
+                            <label for="empresa">Empresa</label>
+                            <select id="empresa" name="empresa">
+                                <option value="" selected>Selecciona una empresa</option>
+                                <option value="Inversiones">Inversiones Rueda</option>
+                                <option value="Lamar">Lamar Optical</option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <label for="cantidad_minima">Cantidad mínima en PRINCIPAL</label>
+                            <input id="cantidad_minima" name="cantidad_minima" type="number" min="0" value="3" required />
+                        </div>
+                    </div>
+
+                    <div class="note" style="margin-bottom: 12px;">La descarga se realiza en ZIP con nombre de empresa y fecha de generación.</div>
+
+                    <div class="row">
+                        <label>Vendedores / Bodegas (obligatorio)</label>
+                        <button class="btn-secondary" type="button" id="btnCargarBodegas">Leer vendedores desde el Excel</button>
+                        <div class="table-actions" id="tableActions" style="display:none;">
+                            <button class="btn-mini" type="button" id="btnSeleccionarTodos">Seleccionar todos</button>
+                            <button class="btn-mini alt" type="button" id="btnLimpiarSeleccion">Limpiar selección</button>
+                        </div>
+                        <div class="table-wrap" id="tableWrap" style="display:none;">
+                            <table class="vendors-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 90px;">Usar</th>
+                                        <th>Vendedor / Bodega</th>
+                                        <th style="width: 180px;">Filtro mínimo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vendorsBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="note">Marca los vendedores que quieres procesar y define su filtro individual.</div>
+                        <div id="vendorsMsg" class="inline-msg"></div>
+                    </div>
+
+                    <input type="hidden" id="bodegas" name="bodegas" />
+                    <input type="hidden" id="filtros_por_bodega" name="filtros_por_bodega" />
+
+                    <button type="submit">Generar y descargar reportes</button>
+                </form>
+            </main>
+        </section>
+    </div>
+
+    <script>
+        const archivoInput = document.getElementById('archivo_excel');
+        const btnCargarBodegas = document.getElementById('btnCargarBodegas');
+        const empresaSelect = document.getElementById('empresa');
+        const cantidadMinimaInput = document.getElementById('cantidad_minima');
+        const tableWrap = document.getElementById('tableWrap');
+        const tableActions = document.getElementById('tableActions');
+        const vendorsBody = document.getElementById('vendorsBody');
+        const vendorsMsg = document.getElementById('vendorsMsg');
+        const form = document.querySelector('form[action="/generar"]');
+        const bodegasHidden = document.getElementById('bodegas');
+        const filtrosHidden = document.getElementById('filtros_por_bodega');
+        const btnSeleccionarTodos = document.getElementById('btnSeleccionarTodos');
+        const btnLimpiarSeleccion = document.getElementById('btnLimpiarSeleccion');
+
+        function setMsg(text, kind) {
+            vendorsMsg.textContent = text || '';
+            vendorsMsg.className = 'inline-msg' + (kind ? ' ' + kind : '');
+        }
+
+        function renderRows(bodegas) {
+            vendorsBody.innerHTML = '';
+            bodegas.forEach((bodega, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="chk-bodega" data-bodega="${bodega.replace(/"/g, '&quot;')}" ${idx === 0 ? 'checked' : ''}></td>
+                    <td>${bodega}</td>
+                    <td><input type="number" min="0" value="3" class="min-bodega" data-bodega="${bodega.replace(/"/g, '&quot;')}"></td>
+                `;
+                vendorsBody.appendChild(tr);
+            });
+            tableWrap.style.display = bodegas.length ? 'block' : 'none';
+            tableActions.style.display = bodegas.length ? 'flex' : 'none';
+        }
+
+        function setAllChecks(checked) {
+            const checks = document.querySelectorAll('.chk-bodega');
+            checks.forEach(chk => {
+                chk.checked = checked;
+            });
+        }
+
+        btnCargarBodegas.addEventListener('click', async () => {
+            if (!archivoInput.files || !archivoInput.files.length) {
+                setMsg('Primero selecciona un archivo Excel.', 'error');
+                return;
+            }
+
+            setMsg('Leyendo bodegas del archivo...', '');
+            const formData = new FormData();
+            formData.append('archivo_excel', archivoInput.files[0]);
+
+            try {
+                const res = await fetch('/api/bodegas', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.message || 'No se pudieron cargar las bodegas.');
+                }
+
+                if (!data.bodegas || !data.bodegas.length) {
+                    renderRows([]);
+                    setMsg('No se encontraron bodegas de vendedores en el archivo.', 'error');
+                    return;
+                }
+
+                renderRows(data.bodegas);
+                setMsg(`Se cargaron ${data.bodegas.length} bodegas.`, 'success');
+            } catch (err) {
+                renderRows([]);
+                setMsg(err.message || 'Error leyendo bodegas.', 'error');
+            }
+        });
+
+        btnSeleccionarTodos.addEventListener('click', () => {
+            setAllChecks(true);
+            setMsg('Se seleccionaron todas las bodegas.', 'success');
+        });
+
+        btnLimpiarSeleccion.addEventListener('click', () => {
+            setAllChecks(false);
+            setMsg('Selección limpiada. Debes elegir al menos una bodega para continuar.', '');
+        });
+
+        form.addEventListener('submit', (e) => {
+            if (!archivoInput.files || !archivoInput.files.length) {
+                e.preventDefault();
+                alert('Debes cargar un archivo Excel para continuar.');
+                setMsg('Debes cargar un archivo Excel para continuar.', 'error');
+                return;
+            }
+
+            if (!empresaSelect.value) {
+                e.preventDefault();
+                alert('Debes elegir una empresa.');
+                setMsg('Debes elegir una empresa.', 'error');
+                return;
+            }
+
+            const cantidadMinima = Number(cantidadMinimaInput.value);
+            if (Number.isNaN(cantidadMinima) || cantidadMinima < 0) {
+                e.preventDefault();
+                alert('Debes ingresar una cantidad mínima válida (0 o mayor).');
+                setMsg('Debes ingresar una cantidad mínima válida (0 o mayor).', 'error');
+                return;
+            }
+
+            const checks = [...document.querySelectorAll('.chk-bodega:checked')];
+            if (!checks.length) {
+                e.preventDefault();
+                alert('Debes elegir los vendedores.');
+                setMsg('Debes elegir los vendedores.', 'error');
+                return;
+            }
+
+            const bodegas = checks.map(chk => chk.dataset.bodega);
+            bodegasHidden.value = bodegas.join(', ');
+
+            const filtros = [];
+            const mins = [...document.querySelectorAll('.min-bodega')];
+            for (const minInput of mins) {
+                const bodega = minInput.dataset.bodega;
+                if (!bodegas.includes(bodega)) {
+                    continue;
+                }
+                const minVal = minInput.value === '' ? '0' : minInput.value;
+                filtros.push(`${bodega}:${minVal}`);
+            }
+            filtrosHidden.value = filtros.join('\n');
+        });
+    </script>
+</body>
+</html>

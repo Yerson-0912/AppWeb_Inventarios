@@ -1,0 +1,74 @@
+# Configuración de ReportStock
+# Este archivo es OPCIONAL. Si no existe, se usan valores por defecto.
+# Editar según necesidad y guardar como config.yaml en la carpeta raíz
+
+# Configuración de inventario
+inventario:
+  # Cantidad mínima en PRINCIPAL por defecto (puede sobrescribirse en GUI)
+  cantidad_minima: 3
+  
+  # Columnas requeridas en archivo Excel
+  columnas_requeridas:
+    - BODEGA
+    - REFERENCIA
+    - CANTIDAD
+    - NOMBRE DEL GRUPO
+  
+  # Bodega principal de stock
+  bodega_principal: PRINCIPAL
+
+# Configuración de reportes
+reportes:
+  # Carpeta de salida (relativa a carpeta raíz del script)
+  carpeta_salida: reportes
+  
+  # Incluir timestamp en nombres de PDF
+  usar_timestamp: true
+  
+  # Formato de timestamp
+  formato_timestamp: "%Y%m%d_%H%M%S"
+
+# Configuración de PDF
+pdf:
+  # Fuente principal (si existe en carpeta fonts/)
+  fuente_unicode: DejaVuSans.ttf
+  
+  # Fuente fallback
+  fuente_fallback: Helvetica
+  
+  # Incluir metadata
+  incluir_metadata: true
+  
+  # Autor del PDF
+  autor: "Sistema de Reportes"
+  
+  # Asunto del PDF
+  asunto: "Reportes de Productos Agotados"
+
+# Configuración de GUI
+gui:
+  # Tema: System, Dark, Light
+  tema: System
+  
+  # Color principal
+  color_primario: "#2c3e50"
+  
+  # Mostrar logging en consola
+  mostrar_logs: true
+
+# Configuración de empresas
+empresas:
+  Inversiones: "INVERSIONES RUEDA S.A.S"
+  Lamar: "LAMAR OPTICAL S.A.S"
+  Generico: "REPORTE DE PRODUCTOS AGOTADOS"
+
+# Configuración de logging
+logging:
+  # Nivel: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  nivel: INFO
+  
+  # Guardar logs en archivo
+  archivo_log: null  # Cambiar a "reportes/app.log" para activar
+  
+  # Formato de log
+  formato: "%(asctime)s [%(levelname)s] %(message)s"
