@@ -59,6 +59,17 @@ data/ACTUALIZACION*.xlsx
 *.bak
 *.temp
 
+# Temporales de la app web
+tmp_web/uploads/
+tmp_web/reportes/
+tmp_web/reportes_finales/
+tmp_web/*.mp4
+tmp_web/*.zip
+tmp_web/*.pdf
+
+# Historial y salida local (runtime)
+tmp_web/historial_pdf.json
+
 # Ejecutables generados
 *.exe
 *.dmg
