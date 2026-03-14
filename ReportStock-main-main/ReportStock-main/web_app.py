@@ -12,6 +12,9 @@ from pypdf import PdfWriter
 from werkzeug.utils import secure_filename
 
 from reportstock_core import (
+    DEFAULT_PALETA_RESALTADO,
+    NUEVA_COLECCION_REFERENCIAS,
+    PALETAS_RESALTADO,
     generar_pdf_agotados,
     listar_vendedores_desde_excel,
     obtener_agotados_por_bodega,
@@ -38,6 +41,8 @@ app.secret_key = 'reportstock-web-secret'
 DELETE_HISTORY_KEY = os.getenv('HISTORIAL_DELETE_KEY', 'admin123')
 
 PREFERRED_PAGE_LOGO = 'lamar_optical_logo_no_bg.png'
+PREFERRED_BACKGROUND_VIDEO = 'VIDEOS_WEB/Main Comp.mp4'
+PREFERRED_HERO_IMAGE = 'VIDEOS_WEB/hero_inicio.jpg'
 
 
 def _find_page_logo() -> Path | None:
@@ -69,8 +74,32 @@ def _find_lamar_logo() -> Path | None:
     return candidatos[0] if candidatos else None
 
 
+def _find_background_video() -> Path | None:
+    candidates = [
+        BASE_DIR / PREFERRED_BACKGROUND_VIDEO,
+        TMP_DIR / 'Main Comp.mp4',
+    ]
+    for path in candidates:
+        if path.exists() and path.suffix.lower() in {'.mp4', '.webm', '.ogg', '.mov', '.m4v'}:
+            return path
+    return None
+
+
+def _find_hero_image() -> Path | None:
+    candidates = [
+        BASE_DIR / PREFERRED_HERO_IMAGE,
+        BASE_DIR / 'VIDEOS_WEB' / 'banner_6.png',
+    ]
+    for path in candidates:
+        if path.exists() and path.suffix.lower() in {'.png', '.jpg', '.jpeg', '.webp'}:
+            return path
+    return None
+
+
 LAMAR_LOGO_FILE = _find_lamar_logo()
 PAGE_LOGO_FILE = _find_page_logo()
+BACKGROUND_VIDEO_FILE = _find_background_video()
+HERO_IMAGE_FILE = _find_hero_image()
 
 
 def allowed_file(filename: str) -> bool:
@@ -163,13 +192,23 @@ def _parse_filtros_por_bodega(raw: str) -> dict[str, int]:
     return filtros
 
 
-@app.route('/', methods=['GET'])
-def index():
+def _render_index(**extra):
     return render_template(
         'index.html',
         logo_available=bool(LAMAR_LOGO_FILE),
         page_logo_available=bool(PAGE_LOGO_FILE),
+        background_video_available=bool(BACKGROUND_VIDEO_FILE),
+        hero_image_available=bool(HERO_IMAGE_FILE),
+        paletas_resaltado=list(PALETAS_RESALTADO.keys()),
+        default_paleta_resaltado=DEFAULT_PALETA_RESALTADO,
+        total_referencias_nueva_coleccion=len(NUEVA_COLECCION_REFERENCIAS),
+        **extra,
     )
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return _render_index()
 
 
 @app.route('/api/bodegas', methods=['POST'])
@@ -234,6 +273,32 @@ def logo_pagina():
         PAGE_LOGO_FILE,
         as_attachment=False,
         download_name=PAGE_LOGO_FILE.name,
+    )
+
+
+@app.route('/video-fondo', methods=['GET'])
+def video_fondo():
+    if not BACKGROUND_VIDEO_FILE or not BACKGROUND_VIDEO_FILE.exists():
+        flash('No se encontró el video de fondo.', 'error')
+        return redirect(url_for('index'))
+    return send_file(
+        BACKGROUND_VIDEO_FILE,
+        as_attachment=False,
+        download_name=BACKGROUND_VIDEO_FILE.name,
+        conditional=True,
+    )
+
+
+@app.route('/imagen-hero', methods=['GET'])
+def imagen_hero():
+    if not HERO_IMAGE_FILE or not HERO_IMAGE_FILE.exists():
+        flash('No se encontró la imagen principal.', 'error')
+        return redirect(url_for('index'))
+    return send_file(
+        HERO_IMAGE_FILE,
+        as_attachment=False,
+        download_name=HERO_IMAGE_FILE.name,
+        conditional=True,
     )
 
 
@@ -502,6 +567,8 @@ def generar():
     empresa = (request.form.get('empresa') or '').strip()
     bodegas_raw = (request.form.get('bodegas') or '').strip()
     filtros_por_bodega_raw = (request.form.get('filtros_por_bodega') or '').strip()
+    resaltar_nueva_coleccion = (request.form.get('resaltar_nueva_coleccion') or '').strip().lower() in {'1', 'true', 'on', 'si'}
+    paleta_resaltado = (request.form.get('paleta_resaltado') or '').strip() or DEFAULT_PALETA_RESALTADO
 
     try:
         cantidad_minima = int((request.form.get('cantidad_minima') or '3').strip())
@@ -509,30 +576,34 @@ def generar():
             raise ValueError
     except ValueError:
         flash('La cantidad mínima debe ser un número entero mayor o igual a 0.', 'error')
-        return render_template('index.html'), 400
+        return _render_index(), 400
 
     if not excel_file or not excel_file.filename:
         flash('Debes seleccionar un archivo Excel.', 'error')
-        return render_template('index.html'), 400
+        return _render_index(), 400
 
     if not allowed_file(excel_file.filename):
         flash('Formato inválido. Solo se permiten archivos .xls o .xlsx.', 'error')
-        return render_template('index.html'), 400
+        return _render_index(), 400
+
+    if paleta_resaltado not in PALETAS_RESALTADO:
+        flash('La paleta de resaltado seleccionada no es válida.', 'error')
+        return _render_index(), 400
 
     if empresa not in {'Inversiones', 'Lamar'}:
         flash('Debes elegir una empresa.', 'error')
-        return render_template('index.html'), 400
+        return _render_index(), 400
 
     bodegas_seleccionadas = _parse_bodegas(bodegas_raw)
     if not bodegas_seleccionadas:
         flash('Debes elegir los vendedores.', 'error')
-        return render_template('index.html'), 400
+        return _render_index(), 400
 
     try:
         filtros_por_bodega = _parse_filtros_por_bodega(filtros_por_bodega_raw)
     except ValueError as parse_exc:
         flash(str(parse_exc), 'error')
-        return render_template('index.html'), 400
+        return _render_index(), 400
 
     token = uuid.uuid4().hex
     filename = secure_filename(excel_file.filename)
@@ -549,7 +620,7 @@ def generar():
                 f"Estas bodegas no existen en el archivo: {', '.join(bodegas_invalidas)}",
                 'error',
             )
-            return render_template('index.html'), 400
+            return _render_index(), 400
 
         filtros_invalidos = [b for b in filtros_por_bodega.keys() if b not in disponibles_set]
         if filtros_invalidos:
@@ -557,7 +628,7 @@ def generar():
                 f"Hay filtros para bodegas inexistentes: {', '.join(filtros_invalidos)}",
                 'error',
             )
-            return render_template('index.html'), 400
+            return _render_index(), 400
 
         agotados = obtener_agotados_por_bodega(
             upload_path,
@@ -568,11 +639,17 @@ def generar():
 
         report_folder = REPORTS_DIR / token
         report_folder.mkdir(parents=True, exist_ok=True)
-        pdf_paths = generar_pdf_agotados(agotados, carpeta_salida=report_folder, empresa=empresa)
+        pdf_paths = generar_pdf_agotados(
+            agotados,
+            carpeta_salida=report_folder,
+            empresa=empresa,
+            resaltar_nueva_coleccion=resaltar_nueva_coleccion,
+            paleta_resaltado=paleta_resaltado,
+        )
 
         if not pdf_paths:
             flash('No se generaron reportes. Revisa el archivo de entrada.', 'error')
-            return render_template('index.html'), 400
+            return _render_index(), 400
 
         empresa_file = _sanitize_label(empresa if empresa in {'Inversiones', 'Lamar', 'Sin_Empresa'} else empresa)
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -589,6 +666,8 @@ def generar():
                 'vendedor': ', '.join(bodegas_seleccionadas),
                 'cantidad_minima': cantidad_minima,
                 'filtros_por_bodega': filtros_por_bodega,
+                'resaltar_nueva_coleccion': resaltar_nueva_coleccion,
+                'paleta_resaltado': paleta_resaltado if resaltar_nueva_coleccion else None,
                 'archivo_zip': zip_name,
                 'archivos_vendedor': archivos_vendedor,
                 'total_bodegas': len(pdf_paths),
@@ -603,7 +682,7 @@ def generar():
         )
     except Exception as exc:
         flash(f'Error procesando archivo: {exc}', 'error')
-        return render_template('index.html'), 500
+        return _render_index(), 500
 
 
 if __name__ == '__main__':

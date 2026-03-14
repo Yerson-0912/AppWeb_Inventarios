@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ReportStock | Lamar Optical</title>
     <style>
+        html { scroll-behavior: smooth; }
+
         :root {
             --bg: #f2f6fb;
             --surface: #ffffff;
@@ -30,12 +32,154 @@
                 radial-gradient(circle at 85% 10%, rgba(27,95,159,.14) 0%, rgba(27,95,159,0) 35%),
                 var(--bg);
             min-height: 100vh;
+            position: relative;
+        }
+
+        .intro-screen {
+            position: relative;
+            min-height: 100vh;
+            isolation: isolate;
+            overflow: hidden;
+        }
+
+        .intro-video,
+        .intro-fallback {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            z-index: -2;
+        }
+
+        .intro-fallback {
+            background:
+                linear-gradient(180deg, rgba(7, 18, 33, .55) 0%, rgba(7, 18, 33, .25) 45%, rgba(7, 18, 33, .45) 100%),
+                url('/imagen-hero') center/cover no-repeat;
+        }
+
+        .intro-screen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background:
+                linear-gradient(180deg, rgba(7, 18, 33, .68) 0%, rgba(7, 18, 33, .38) 38%, rgba(7, 18, 33, .5) 100%),
+                radial-gradient(circle at 12% 20%, rgba(27,95,159,.34) 0%, rgba(27,95,159,0) 50%);
+        }
+
+        .intro-content {
+            min-height: 100svh;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 36px 18px;
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .intro-copy h1 {
+            margin: 0;
+            color: #f8fbff;
+            font-size: clamp(2rem, 4vw, 3.25rem);
+            line-height: 1.05;
+            letter-spacing: -.02em;
+            text-wrap: balance;
+        }
+
+        .intro-copy p {
+            margin: 14px 0 0;
+            color: rgba(248, 251, 255, .92);
+            max-width: 58ch;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .intro-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(214, 231, 250, .44);
+            background: rgba(20, 74, 126, .32);
+            color: #ecf6ff;
+            font-size: .8rem;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .intro-actions {
+            display: grid;
+            gap: 12px;
+            width: min(360px, 100%);
+            justify-self: end;
+        }
+
+        .intro-btn {
+            border: 1px solid rgba(226, 238, 255, .35);
+            border-radius: 14px;
+            padding: 13px 14px;
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: .01em;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 12px 24px rgba(7, 18, 33, .32);
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .intro-btn.alt {
+            background: linear-gradient(135deg, rgba(255,255,255,.24), rgba(255,255,255,.12));
+            backdrop-filter: blur(8px);
+        }
+
+        .intro-btn.ok {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+        }
+
+        body.has-video {
+            background: #dfe8f2;
+        }
+
+        body.has-video::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                linear-gradient(180deg, rgba(7, 18, 33, .54) 0%, rgba(7, 18, 33, .28) 34%, rgba(242,246,251,.58) 100%),
+                radial-gradient(circle at 20% 18%, rgba(20,74,126,.24) 0%, rgba(20,74,126,0) 48%);
+            pointer-events: none;
+        }
+
+        .bg-video-wrap {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            background: #07111d;
+        }
+
+        .bg-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            opacity: .96;
         }
 
         .shell {
             max-width: 1320px;
-            margin: 24px auto;
+            margin: 18px auto 24px;
             padding: 0 18px 30px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
@@ -46,7 +190,8 @@
             padding: 14px 16px;
             border: 1px solid var(--line);
             border-radius: 16px;
-            background: var(--surface);
+            background: rgba(255, 255, 255, .76);
+            backdrop-filter: blur(9px);
             box-shadow: var(--shadow);
         }
 
@@ -109,7 +254,8 @@
         .image-card {
             border: 1px solid var(--line);
             border-radius: 18px;
-            background: var(--surface);
+            background: rgba(255, 255, 255, .74);
+            backdrop-filter: blur(9px);
             box-shadow: var(--shadow);
         }
 
@@ -174,10 +320,16 @@
         .image-card {
             min-height: 240px;
             background:
-                linear-gradient(0deg, rgba(15,23,42,.15), rgba(15,23,42,.15)),
+                linear-gradient(0deg, rgba(15,23,42,.28), rgba(15,23,42,.28)),
                 url('https://images.unsplash.com/photo-1574258495973-f010dfbb5371?auto=format&fit=crop&w=1400&q=60') center/cover no-repeat;
             position: relative;
             overflow: hidden;
+        }
+
+        .image-card.with-company-image {
+            background:
+                linear-gradient(0deg, rgba(15,23,42,.28), rgba(15,23,42,.28)),
+                url('/imagen-hero') center/cover no-repeat;
         }
 
         .image-card .caption {
@@ -199,6 +351,7 @@
             display: grid;
             grid-template-columns: .9fr 1.1fr;
             gap: 14px;
+            align-items: start;
         }
 
         .panel,
@@ -212,7 +365,7 @@
         .panel {
             padding: 18px;
             background:
-                linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+                linear-gradient(180deg, rgba(255,255,255,.78) 0%, rgba(249,252,255,.68) 100%);
         }
 
         .panel h3 {
@@ -238,21 +391,67 @@
         .checklist li {
             border: 1px solid var(--line);
             border-radius: 11px;
-            padding: 9px 10px;
+            padding: 10px 10px;
             font-size: .89rem;
-            background: #fff;
+            background: rgba(255,255,255,.78);
             color: #1e293b;
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            align-items: center;
+            gap: 8px;
         }
 
         .checklist li::before {
-            content: '✓';
-            font-weight: 800;
-            color: var(--ok);
-            margin-right: 8px;
+            content: attr(data-step);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 900;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 4px 10px rgba(20,74,126,.22);
+        }
+
+        .flow-note {
+            margin-top: 10px;
+            border: 1px dashed #b9c9df;
+            border-radius: 10px;
+            padding: 9px 10px;
+            background: rgba(233, 244, 255, .56);
+            color: #1f3e5f;
+            font-size: .82rem;
+            line-height: 1.45;
+        }
+
+        .flow-note strong {
+            color: #0f2e4b;
+        }
+
+        .flow-pills {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .flow-pill {
+            border: 1px solid #c7d8ea;
+            background: rgba(255,255,255,.8);
+            color: #214566;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: .74rem;
+            font-weight: 700;
+            letter-spacing: .01em;
         }
 
         .form-card {
             padding: 20px;
+            background: rgba(255, 255, 255, .78);
         }
 
         .form-card h3 {
@@ -274,6 +473,7 @@
             font-weight: 700;
             font-size: .9rem;
             color: #1e293b;
+            text-shadow: 0 1px 0 rgba(255,255,255,.45);
         }
 
         input,
@@ -306,6 +506,8 @@
             background: linear-gradient(135deg, var(--primary), var(--primary-2));
             box-shadow: 0 10px 22px rgba(20,74,126,.3);
             cursor: pointer;
+            position: relative;
+            z-index: 1;
         }
 
         button:hover {
@@ -322,6 +524,27 @@
             margin-top: 6px;
             font-size: .81rem;
             color: var(--muted);
+        }
+
+        .inline-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+            padding: 11px 12px;
+            border: 1px solid #c9d6e7;
+            border-radius: 12px;
+            background: rgba(255,255,255,.74);
+            font-size: .93rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .inline-toggle input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            padding: 0;
+            accent-color: var(--primary);
         }
 
         .table-actions {
@@ -348,12 +571,16 @@
             border-radius: 12px;
             overflow: hidden;
             margin-top: 10px;
+            background: rgba(255,255,255,.72);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .vendors-table {
             width: 100%;
             border-collapse: collapse;
             font-size: .9rem;
+            min-width: 520px;
         }
 
         .vendors-table th,
@@ -365,12 +592,20 @@
         }
 
         .vendors-table th {
-            background: #f3f8fe;
+            background: rgba(243, 248, 254, .78);
             color: #28435f;
             font-weight: 800;
             font-size: .79rem;
             text-transform: uppercase;
             letter-spacing: .04em;
+        }
+
+        .hero-card h2,
+        .hero-card p,
+        .panel h3,
+        .panel p,
+        .form-card h3 {
+            text-shadow: 0 1px 0 rgba(255,255,255,.45);
         }
 
         .vendors-table tr:last-child td { border-bottom: none; }
@@ -411,7 +646,41 @@
             border-color: #86efac;
         }
 
+        @media (max-width: 1360px) {
+            .intro-content,
+            .shell {
+                max-width: 1180px;
+            }
+
+            .intro-content {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .shell {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+
         @media (max-width: 1120px) {
+            .intro-screen {
+                min-height: 86svh;
+            }
+
+            .intro-content {
+                grid-template-columns: 1fr;
+                align-items: end;
+                gap: 16px;
+                padding-top: 28px;
+                padding-bottom: 24px;
+            }
+
+            .intro-actions {
+                justify-self: start;
+                width: min(420px, 100%);
+            }
+
             .hero,
             .main-grid {
                 grid-template-columns: 1fr;
@@ -422,10 +691,65 @@
             }
         }
 
+        @media (max-width: 900px) {
+            .intro-copy h1 {
+                font-size: clamp(1.78rem, 7vw, 2.45rem);
+            }
+
+            .intro-copy p {
+                font-size: .95rem;
+                line-height: 1.5;
+            }
+
+            .hero-card,
+            .panel,
+            .form-card {
+                padding: 16px;
+            }
+
+            .kpi {
+                padding: 9px;
+            }
+        }
+
         @media (max-width: 760px) {
+            .intro-screen::before {
+                background:
+                    linear-gradient(180deg, rgba(7, 18, 33, .72) 0%, rgba(7, 18, 33, .46) 44%, rgba(7, 18, 33, .62) 100%),
+                    radial-gradient(circle at 20% 18%, rgba(20,74,126,.24) 0%, rgba(20,74,126,0) 54%);
+            }
+
+            .intro-content {
+                min-height: 100svh;
+                padding: 22px 14px 20px;
+                align-items: end;
+            }
+
+            .intro-actions {
+                width: 100%;
+                justify-self: stretch;
+            }
+
+            .intro-btn {
+                padding: 12px;
+                font-size: .92rem;
+            }
+
+            .shell {
+                margin-top: 10px;
+                padding: 0 12px 24px;
+            }
+
             .header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 12px;
+                padding: 12px;
+            }
+
+            .header a {
+                width: 100%;
+                text-align: center;
             }
 
             .row-grid {
@@ -442,13 +766,96 @@
                 height: 52px;
             }
 
+            .brand-meta h1 {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                line-height: 1.2;
+            }
+
             .kpis {
                 grid-template-columns: 1fr;
+            }
+
+            .table-actions {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .table-actions button {
+                flex: 1 1 48%;
+                min-height: 38px;
+            }
+
+            .vendors-table {
+                font-size: .84rem;
+            }
+
+            .vendors-table th,
+            .vendors-table td {
+                white-space: nowrap;
+                padding: 8px 9px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .intro-chip {
+                font-size: .72rem;
+                padding: 5px 10px;
+            }
+
+            .intro-copy h1 {
+                font-size: clamp(1.58rem, 8.2vw, 2.05rem);
+            }
+
+            .intro-copy p {
+                font-size: .9rem;
+            }
+
+            .hero-card h2 {
+                font-size: 1.32rem;
+            }
+
+            .note {
+                font-size: .78rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
             }
         }
     </style>
 </head>
 <body>
+    <section class="intro-screen" id="inicio">
+        {% if background_video_available %}
+            <video class="intro-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+                <source src="/video-fondo" type="video/mp4" />
+            </video>
+        {% else %}
+            <div class="intro-fallback" aria-hidden="true"></div>
+        {% endif %}
+
+        <div class="intro-content">
+            <div class="intro-copy">
+                <span class="intro-chip">Lamar Optical</span>
+                <h1>Panel inteligente para generar reportes de agotados en segundos</h1>
+                <p>
+                    Gestiona inventario por vendedor, aplica filtros personalizados y exporta reportes PDF en una sola ventana.
+                    Pulsa Generar Reportes para deslizar automáticamente al formulario.
+                </p>
+            </div>
+
+            <div class="intro-actions">
+                <button class="intro-btn" type="button" data-scroll-target="reportes">Generar reportes</button>
+                <button class="intro-btn alt" type="button" data-scroll-target="flujo-recomendado">Ver flujo de trabajo</button>
+                <a class="intro-btn ok" href="/historial">Ir al historial de PDFs</a>
+            </div>
+        </div>
+    </section>
+
     <div class="shell">
         <header class="header">
             <div class="brand">
@@ -483,24 +890,33 @@
                     </div>
                 </div>
             </div>
-            <div class="image-card">
+            <div class="image-card {% if hero_image_available %}with-company-image{% endif %}">
                 <div class="caption">Ópticas modernas · control de inventario · procesos empresariales</div>
             </div>
         </section>
 
         <section class="main-grid">
-            <aside class="panel">
+            <aside class="panel" id="flujo-recomendado">
                 <h3>Flujo recomendado</h3>
-                <p>El sistema analiza la bodega PRINCIPAL y compara la disponibilidad por vendedor para identificar agotados críticos.</p>
+                <p>Este es el orden más rápido para evitar errores y generar tus reportes en un solo intento.</p>
                 <ul class="checklist">
-                    <li>Cargar archivo Excel de inventario</li>
-                    <li>Seleccionar empresa y cantidad mínima</li>
-                    <li>Leer vendedores y aplicar filtros individuales</li>
-                    <li>Generar ZIP con fecha y empresa</li>
+                    <li data-step="1">Carga el archivo Excel de inventario actualizado.</li>
+                    <li data-step="2">Selecciona empresa y define la cantidad mínima en PRINCIPAL.</li>
+                    <li data-step="3">Pulsa Leer vendedores y marca solo las bodegas que vas a procesar.</li>
+                    <li data-step="4">Activa Nueva colección si quieres resaltar referencias recientes.</li>
+                    <li data-step="5">Genera y descarga el ZIP con todos los PDFs listos para compartir.</li>
                 </ul>
+                <div class="flow-note">
+                    <strong>Tip:</strong> si cambias el archivo Excel, vuelve a pulsar <strong>Leer vendedores</strong> para refrescar la tabla antes de generar.
+                </div>
+                <div class="flow-pills" aria-label="Ayudas rápidas">
+                    <span class="flow-pill">Tiempo promedio: 1-2 min</span>
+                    <span class="flow-pill">Salida: ZIP + PDFs</span>
+                    <span class="flow-pill">Filtros por bodega</span>
+                </div>
             </aside>
 
-            <main class="form-card">
+            <main class="form-card" id="reportes">
                 <h3>Generar reportes de agotados</h3>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -530,6 +946,26 @@
                         <div class="row">
                             <label for="cantidad_minima">Cantidad mínima en PRINCIPAL</label>
                             <input id="cantidad_minima" name="cantidad_minima" type="number" min="0" value="3" required />
+                        </div>
+                    </div>
+
+                    <div class="row-grid">
+                        <div class="row">
+                            <label for="resaltar_nueva_coleccion">Nueva colección</label>
+                            <label class="inline-toggle" for="resaltar_nueva_coleccion">
+                                <input id="resaltar_nueva_coleccion" name="resaltar_nueva_coleccion" type="checkbox" value="1" />
+                                <span>Resaltar las filas de la última colección ({{ total_referencias_nueva_coleccion }})</span>
+                            </label>
+                        </div>
+
+                        <div class="row">
+                            <label for="paleta_resaltado">Gama de colores</label>
+                            <select id="paleta_resaltado" name="paleta_resaltado" disabled>
+                                {% for paleta in paletas_resaltado %}
+                                    <option value="{{ paleta }}" {% if paleta == default_paleta_resaltado %}selected{% endif %}>{{ paleta }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="note">La paleta elegida se aplicará a las referencias de la nueva colección en los PDFs.</div>
                         </div>
                     </div>
 
@@ -581,10 +1017,16 @@
         const filtrosHidden = document.getElementById('filtros_por_bodega');
         const btnSeleccionarTodos = document.getElementById('btnSeleccionarTodos');
         const btnLimpiarSeleccion = document.getElementById('btnLimpiarSeleccion');
+        const resaltarNuevaColeccionInput = document.getElementById('resaltar_nueva_coleccion');
+        const paletaResaltadoSelect = document.getElementById('paleta_resaltado');
 
         function setMsg(text, kind) {
             vendorsMsg.textContent = text || '';
             vendorsMsg.className = 'inline-msg' + (kind ? ' ' + kind : '');
+        }
+
+        function syncHighlightControls() {
+            paletaResaltadoSelect.disabled = !resaltarNuevaColeccionInput.checked;
         }
 
         function renderRows(bodegas) {
@@ -650,6 +1092,18 @@
             setMsg('Selección limpiada. Debes elegir al menos una bodega para continuar.', '');
         });
 
+        resaltarNuevaColeccionInput.addEventListener('change', syncHighlightControls);
+
+        document.querySelectorAll('[data-scroll-target]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-scroll-target');
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
         form.addEventListener('submit', (e) => {
             if (!archivoInput.files || !archivoInput.files.length) {
                 e.preventDefault();
@@ -696,6 +1150,8 @@
             }
             filtrosHidden.value = filtros.join('\n');
         });
+
+        syncHighlightControls();
     </script>
 </body>
 </html>

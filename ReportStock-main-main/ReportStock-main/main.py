@@ -31,6 +31,14 @@ import platform
 import subprocess
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+from reportstock_core import (
+    DEFAULT_PALETA_RESALTADO,
+    NUEVA_COLECCION_REFERENCIAS,
+    PALETAS_RESALTADO,
+    construir_configuracion_resaltado,
+    obtener_paleta_resaltado,
+    referencia_en_nueva_coleccion,
+)
 
 def get_base_dir() -> Path:
     """
@@ -49,6 +57,7 @@ def get_base_dir() -> Path:
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
 VENDEDORA_CON_COLUMNA_PRINCIPAL = 'MALETA NATALIA REYES'
+TREEVIEW_TAG_NUEVA_COLECCION = 'nueva_coleccion'
 
 
 def read_excel_smart(ruta: Path) -> pd.DataFrame:
@@ -198,7 +207,13 @@ def obtener_agotados_por_bodega(ruta_archivo: Path, cantidad_minima: int = 3, pr
 
 
 
-def generar_pdf_agotados(agotados: dict, carpeta_salida: str = 'reportes', empresa: str = '') -> None:
+def generar_pdf_agotados(
+    agotados: dict,
+    carpeta_salida: str = 'reportes',
+    empresa: str = '',
+    resaltar_nueva_coleccion: bool = False,
+    paleta_resaltado: str | None = None,
+) -> None:
     """
     Genera un PDF por cada bodega con su informe de productos agotados
     
@@ -212,6 +227,10 @@ def generar_pdf_agotados(agotados: dict, carpeta_salida: str = 'reportes', empre
     
     # Fecha actual
     fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
+    configuracion_resaltado = construir_configuracion_resaltado(
+        habilitado=resaltar_nueva_coleccion,
+        nombre_paleta=paleta_resaltado,
+    )
 
     # Registrar fuente TTF si existe (permite acentos y símbolos unicode)
     default_font = 'Helvetica'
@@ -365,7 +384,7 @@ def generar_pdf_agotados(agotados: dict, carpeta_salida: str = 'reportes', empre
                 else:
                     tabla = Table(datos_tabla, colWidths=[2.5*inch, 1.5*inch])
                 
-                tabla.setStyle(TableStyle([
+                estilos_tabla = [
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -379,7 +398,18 @@ def generar_pdf_agotados(agotados: dict, carpeta_salida: str = 'reportes', empre
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                     ('GRID', (0, 0), (-1, -1), 1, colors.black),
                     ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
-                ]))
+                ]
+
+                if configuracion_resaltado['habilitado']:
+                    for fila_idx, prod in enumerate(grupos[grupo], start=1):
+                        if referencia_en_nueva_coleccion(prod.get('referencia')):
+                            estilos_tabla.extend([
+                                ('BACKGROUND', (0, fila_idx), (-1, fila_idx), configuracion_resaltado['fondo']),
+                                ('TEXTCOLOR', (0, fila_idx), (-1, fila_idx), configuracion_resaltado['texto']),
+                                ('LINEBELOW', (0, fila_idx), (-1, fila_idx), 1, configuracion_resaltado['borde']),
+                            ])
+
+                tabla.setStyle(TableStyle(estilos_tabla))
                 
                 elementos.append(tabla)
                 elementos.append(Spacer(1, 15))
@@ -553,6 +583,36 @@ if __name__ == '__main__':
             spin_cantidad = tk.Spinbox(left_frame, from_=0, to=1000, textvariable=cantidad_var, width=10)
         spin_cantidad.pack(anchor='w', padx=16, pady=(0, 8))
 
+        # Resaltado de nueva coleccion
+        resaltar_nueva_coleccion_var = tk.BooleanVar(value=False)
+        paleta_resaltado_var = tk.StringVar(value=DEFAULT_PALETA_RESALTADO)
+        lbl_resaltado = ctk.CTkLabel(left_frame, text='Nueva coleccion', anchor='w')
+        lbl_resaltado.pack(fill='x', padx=16, pady=(6, 4))
+        chk_resaltado = ctk.CTkCheckBox(
+            left_frame,
+            text=f'Resaltar referencias de la ultima coleccion ({len(NUEVA_COLECCION_REFERENCIAS)})',
+            variable=resaltar_nueva_coleccion_var,
+            onvalue=True,
+            offvalue=False,
+        )
+        chk_resaltado.pack(fill='x', padx=16, pady=(0, 6))
+        combo_paleta = ttk.Combobox(
+            left_frame,
+            textvariable=paleta_resaltado_var,
+            values=list(PALETAS_RESALTADO.keys()),
+            state='disabled',
+        )
+        combo_paleta.pack(fill='x', padx=16, pady=(0, 4))
+        lbl_paleta = ctk.CTkLabel(
+            left_frame,
+            text='Elige la gama de colores para las filas resaltadas.',
+            wraplength=260,
+            anchor='w',
+            text_color=COLORS['muted'],
+            font=('Segoe UI', 10),
+        )
+        lbl_paleta.pack(fill='x', padx=16, pady=(0, 8))
+
         # Acción principal
         status_var = tk.StringVar(value='Listo')
         boton_generar = ctk.CTkButton(left_frame, text='Generar PDF', fg_color=COLORS['success'], hover_color='#33bc54', corner_radius=6)
@@ -601,6 +661,38 @@ if __name__ == '__main__':
         # Keep preview data for filtering and sorting
         preview_data = []
 
+        def configure_tree_highlight_tag():
+            paleta = obtener_paleta_resaltado(paleta_resaltado_var.get())
+            tree.tag_configure(
+                TREEVIEW_TAG_NUEVA_COLECCION,
+                background=paleta['fondo'],
+                foreground=paleta['texto'],
+            )
+
+        def insert_preview_row(prod):
+            tags = ()
+            if resaltar_nueva_coleccion_var.get() and referencia_en_nueva_coleccion(prod.get('referencia')):
+                tags = (TREEVIEW_TAG_NUEVA_COLECCION,)
+            tree.insert(
+                '',
+                'end',
+                values=(prod['nombre_grupo'], prod['referencia'], prod['cantidad_vendedor'], prod['cantidad_principal']),
+                tags=tags,
+            )
+
+        def refresh_preview():
+            q = buscar_var.get().strip().lower()
+            configure_tree_highlight_tag()
+            for item in tree.get_children():
+                tree.delete(item)
+            for prod in preview_data:
+                if not q or q in str(prod['nombre_grupo']).lower() or q in str(prod['referencia']).lower():
+                    insert_preview_row(prod)
+
+        def update_highlight_controls(*_args):
+            combo_paleta.configure(state='readonly' if resaltar_nueva_coleccion_var.get() else 'disabled')
+            refresh_preview()
+
         # Sorting helper
         def treeview_sort_column(tv, col, reverse=False):
             try:
@@ -622,14 +714,11 @@ if __name__ == '__main__':
 
         # Filter helper
         def apply_filter():
-            q = buscar_var.get().strip().lower()
-            for item in tree.get_children():
-                tree.delete(item)
-            for prod in preview_data:
-                if not q or q in str(prod['nombre_grupo']).lower() or q in str(prod['referencia']).lower():
-                    tree.insert('', 'end', values=(prod['nombre_grupo'], prod['referencia'], prod['cantidad_vendedor'], prod['cantidad_principal']))
+            refresh_preview()
 
         entry_buscar.bind('<KeyRelease>', lambda e: apply_filter())
+        combo_paleta.bind('<<ComboboxSelected>>', update_highlight_controls)
+        chk_resaltado.configure(command=update_highlight_controls)
 
         # Footer
         footer = ctk.CTkLabel(ventana, text='Desarrollado por: Yerson Vargas', fg_color='transparent', text_color=COLORS['muted'])
@@ -755,7 +844,13 @@ if __name__ == '__main__':
                     progress_callback=progress_handler,
                     vendedores_filtrados=vendedores_filtrados
                 )
-                generar_pdf_agotados(agotados, carpeta_salida=carpeta_destino, empresa=empresa_sel)
+                generar_pdf_agotados(
+                    agotados,
+                    carpeta_salida=carpeta_destino,
+                    empresa=empresa_sel,
+                    resaltar_nueva_coleccion=resaltar_nueva_coleccion_var.get(),
+                    paleta_resaltado=paleta_resaltado_var.get(),
+                )
 
                 # Prepare preview_data and schedule GUI update on main thread
                 preview = []
@@ -768,10 +863,8 @@ if __name__ == '__main__':
                     # update the outer preview_data list in-place to avoid nonlocal
                     preview_data.clear()
                     preview_data.extend(preview)
-                    for item in tree.get_children():
-                        tree.delete(item)
-                    for prod in preview_data[:200]:
-                        tree.insert('', 'end', values=(prod['nombre_grupo'], prod['referencia'], prod['cantidad_vendedor'], prod['cantidad_principal']))
+                    del preview_data[200:]
+                    refresh_preview()
                     status_var.set('Generación finalizada')
                     messagebox.showinfo("Reporte", "Generación de reportes finalizada.")
 
@@ -787,5 +880,6 @@ if __name__ == '__main__':
             threading.Thread(target=_worker_generar_reporte, daemon=True).start()
 
         boton_generar.configure(command=on_generar_clicked)
+        update_highlight_controls()
 
         ventana.mainloop()

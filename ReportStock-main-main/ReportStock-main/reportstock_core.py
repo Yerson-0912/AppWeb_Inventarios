@@ -21,6 +21,238 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 VENDEDORA_CON_COLUMNA_PRINCIPAL = 'MALETA NATALIA REYES'
 
 
+def _normalizar_token_referencia(token: str, indice: int) -> str:
+    token_limpio = str(token or '').strip().upper()
+    if indice > 0:
+        match = re.fullmatch(r'([A-Z]+)0*(\d+)', token_limpio)
+        if match:
+            prefijo, numero = match.groups()
+            return f'{prefijo}{int(numero)}'
+    return token_limpio
+
+
+def normalizar_referencia(referencia: object) -> str:
+    referencia_base = re.sub(r'\s+', ' ', str(referencia or '').strip()).upper()
+    if not referencia_base:
+        return ''
+    tokens = referencia_base.split(' ')
+    return ' '.join(_normalizar_token_referencia(token, indice) for indice, token in enumerate(tokens))
+
+
+NUEVA_COLECCION_REFERENCIAS = frozenset(
+    referencia.strip()
+    for referencia in """
+L1290 C01
+L1290 C02
+L1290 C03
+L1290 C04
+L1291 C01
+L1291 C02
+L1291 C03
+L1291 C04
+L1292 C01
+L1292 C02
+L1292 C03
+L1292 C04
+L1293 C01
+L1293 C02
+L1293 C03
+L1293 C04
+L1294 C01
+L1294 C02
+L1294 C03
+L1294 C04
+L1295 C01
+L1295 C02
+L1295 C03
+L1295 C04
+L1296 C01
+L1296 C02
+L1296 C03
+L1296 C04
+L1297 C01
+L1297 C02
+L1297 C03
+L1297 C04
+L1297 C05
+L1298 C01
+L1298 C02
+L1298 C03
+L1298 C04
+L1299 C01
+L1299 C02
+L1299 C03
+L1299 C04
+L1300 C01
+L1300 C02
+L1300 C03
+L1300 C04
+L1301 C01
+L1301 C02
+L1301 C03
+L1301 C04
+L1302 C01
+L1302 C02
+L1302 C03
+L1302 C04
+L1303 C01
+L1303 C02
+L1303 C03
+L1303 C04
+L1304 C01
+L1304 C02
+L1304 C03
+L1304 C04
+L1305 C01
+L1305 C02
+L1305 C03
+L1305 C04
+L1306 C01
+L1306 C02
+L1306 C03
+L1306 C04
+L1307 C01
+L1307 C02
+L1307 C03
+L1307 C04
+L1308 C01
+L1308 C02
+L1308 C03
+L1308 C04
+L1309 C01
+L1309 C02
+L1309 C03
+L1309 C04
+L1310 C01
+L1310 C02
+L1310 C03
+L1310 C04
+L1311 C01
+L1311 C02
+L1311 C03
+L1311 C04
+OB070 C1
+OB070 C2
+OB070 C3
+OB070 C4
+OB071 C1
+OB071 C2
+OB071 C3
+OB071 C4
+OB072 C1
+OB072 C2
+OB072 C3
+OB072 C4
+OB073 C1
+OB073 C2
+OB073 C3
+OB073 C4
+OB074 C1
+OB074 C2
+OB074 C3
+OB074 C4
+OB075 C1
+OB075 C2
+OB075 C3
+OB075 C4
+OB076 C1
+OB076 C2
+OB076 C3
+OB076 C4
+OB077 C1
+OB077 C2
+OB077 C3
+OB077 C4
+LJ090 C01
+LJ090 C02
+LJ090 C03
+LJ090 C04
+LJ091 C01
+LJ091 C02
+LJ091 C03
+LJ091 C04
+LJ092 C01
+LJ092 C02
+LJ092 C03
+LJ092 C04
+LJ093 C01
+LJ093 C02
+LJ093 C03
+LJ093 C04
+LJ094 C01
+LJ094 C02
+LJ094 C03
+LJ094 C04
+LJ095 C01
+LJ095 C02
+LJ095 C03
+LJ095 C04
+LJ096 C01
+LJ096 C02
+LJ096 C03
+LJ096 C04
+LJ097 C01
+LJ097 C02
+LJ097 C03
+LJ097 C04
+LJ098 C01
+LJ098 C02
+LJ098 C03
+LJ098 C04
+LJ099 C01
+LJ099 C02
+LJ099 C03
+LJ099 C04
+LJ100 C01
+LJ100 C02
+LJ100 C03
+LJ100 C04
+""".splitlines()
+    if referencia.strip()
+)
+
+PALETAS_RESALTADO = {
+    'Amarillo suave': {'fondo': '#FFF200', 'texto': '#1F1F1F', 'borde': '#D4B100'},
+    'Amarillo intenso': {'fondo': '#FFF000', 'texto': '#111111', 'borde': '#C9A800'},
+    'Verde menta': {'fondo': '#D9FBE8', 'texto': '#0F5132', 'borde': '#34A853'},
+    'Azul cielo': {'fondo': '#DCEEFF', 'texto': '#0B3C5D', 'borde': '#4A90E2'},
+    'Coral suave': {'fondo': '#FFE2DB', 'texto': '#7A271A', 'borde': '#F97360'},
+    'Lavanda': {'fondo': '#EFE4FF', 'texto': '#4B2E83', 'borde': '#9B6DDB'},
+}
+DEFAULT_PALETA_RESALTADO = 'Amarillo suave'
+NUEVA_COLECCION_REFERENCIAS_NORMALIZADAS = frozenset(
+    normalizar_referencia(referencia)
+    for referencia in NUEVA_COLECCION_REFERENCIAS
+    if normalizar_referencia(referencia)
+)
+
+
+def referencia_en_nueva_coleccion(referencia: object) -> bool:
+    return normalizar_referencia(referencia) in NUEVA_COLECCION_REFERENCIAS_NORMALIZADAS
+
+
+def obtener_paleta_resaltado(nombre_paleta: str | None = None) -> dict[str, str]:
+    paleta_final = nombre_paleta if nombre_paleta in PALETAS_RESALTADO else DEFAULT_PALETA_RESALTADO
+    return {'nombre': paleta_final, **PALETAS_RESALTADO[paleta_final]}
+
+
+def construir_configuracion_resaltado(
+    habilitado: bool = False,
+    nombre_paleta: str | None = None,
+) -> dict[str, object]:
+    paleta = obtener_paleta_resaltado(nombre_paleta)
+    return {
+        'habilitado': bool(habilitado),
+        'nombre_paleta': paleta['nombre'],
+        'fondo_hex': paleta['fondo'],
+        'texto_hex': paleta['texto'],
+        'borde_hex': paleta['borde'],
+        'fondo': colors.HexColor(paleta['fondo']),
+        'texto': colors.HexColor(paleta['texto']),
+        'borde': colors.HexColor(paleta['borde']),
+    }
+
+
 def _find_company_logo(empresa: str) -> Path | None:
     base_dir = Path(__file__).resolve().parent
     empresa_key = (empresa or '').strip().lower()
@@ -154,11 +386,21 @@ def obtener_agotados_por_bodega(
     return agotados_por_bodega
 
 
-def generar_pdf_agotados(agotados: dict, carpeta_salida: str | Path = 'reportes', empresa: str = '') -> list[Path]:
+def generar_pdf_agotados(
+    agotados: dict,
+    carpeta_salida: str | Path = 'reportes',
+    empresa: str = '',
+    resaltar_nueva_coleccion: bool = False,
+    paleta_resaltado: str | None = None,
+) -> list[Path]:
     carpeta = Path(carpeta_salida)
     carpeta.mkdir(parents=True, exist_ok=True)
 
     fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
+    configuracion_resaltado = construir_configuracion_resaltado(
+        habilitado=resaltar_nueva_coleccion,
+        nombre_paleta=paleta_resaltado,
+    )
 
     default_font = 'Helvetica'
     try:
@@ -284,24 +526,33 @@ def generar_pdf_agotados(agotados: dict, carpeta_salida: str | Path = 'reportes'
                 else:
                     tabla = Table(datos_tabla, colWidths=[2.5 * inch, 1.5 * inch])
 
-                tabla.setStyle(
-                    TableStyle(
-                        [
-                            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
-                            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                            ('FONTSIZE', (0, 0), (-1, 0), 11),
-                            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-                            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                            ('FONTSIZE', (0, 1), (-1, -1), 9),
-                            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
-                        ]
-                    )
-                )
+                estilos_tabla = [
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 11),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 9),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+                ]
+
+                if configuracion_resaltado['habilitado']:
+                    for fila_idx, prod in enumerate(grupos[grupo], start=1):
+                        if referencia_en_nueva_coleccion(prod.get('referencia')):
+                            estilos_tabla.extend(
+                                [
+                                    ('BACKGROUND', (0, fila_idx), (-1, fila_idx), configuracion_resaltado['fondo']),
+                                    ('TEXTCOLOR', (0, fila_idx), (-1, fila_idx), configuracion_resaltado['texto']),
+                                    ('LINEBELOW', (0, fila_idx), (-1, fila_idx), 1, configuracion_resaltado['borde']),
+                                ]
+                            )
+
+                tabla.setStyle(TableStyle(estilos_tabla))
                 elementos.append(tabla)
                 elementos.append(Spacer(1, 15))
         else:
